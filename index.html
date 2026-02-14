@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Dev Pulse: Audience & Market Intelligence</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome (for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chosen Palette: Warm Neutrals with Professional Accents -->
+    <!-- Application Structure Plan: 
+         The app is structured as a single-page dashboard with four thematic views:
+         1. 'Global Audience': Geographic and demographic data.
+         2. 'Tech Market': Stack comparisons and adoption.
+         3. 'Forecast & Strategy': Future predictions.
+         4. '✨ AI Insights': Gemini-powered project consulting and data summarization.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used directly. NO Mermaid JS used. -->
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f4; /* Stone-100 - Warm Neutral */
+            color: #1c1917; /* Stone-900 */
+        }
+
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .tab-btn.active {
+            border-bottom: 2px solid #ea580c; /* Orange-600 */
+            color: #ea580c;
+            font-weight: 600;
+        }
+
+        .ai-loading {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+
+        .markdown-content h1 { font-weight: bold; font-size: 1.25rem; margin-top: 1rem; }
+        .markdown-content h2 { font-weight: bold; font-size: 1.1rem; margin-top: 0.75rem; }
+        .markdown-content p { margin-bottom: 0.5rem; }
+        .markdown-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Navigation / Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-globe text-orange-600 text-xl mr-3"></i>
+                    <h1 class="text-xl font-bold text-stone-800 tracking-tight">Global Dev Pulse</h1>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <button onclick="app.switchTab('audience')" id="nav-audience" class="tab-btn active px-3 py-2 text-sm font-medium text-stone-500 hover:text-stone-900 transition-colors">Global Audience</button>
+                    <button onclick="app.switchTab('market')" id="nav-market" class="tab-btn px-3 py-2 text-sm font-medium text-stone-500 hover:text-stone-900 transition-colors">Tech Market</button>
+                    <button onclick="app.switchTab('forecast')" id="nav-forecast" class="tab-btn px-3 py-2 text-sm font-medium text-stone-500 hover:text-stone-900 transition-colors">Forecasts & Strategy</button>
+                    <button onclick="app.switchTab('ai')" id="nav-ai" class="tab-btn px-3 py-2 text-sm font-medium text-stone-500 hover:text-stone-900 transition-colors">✨ AI Insights</button>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-stone-500 hover:text-stone-900 p-2">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-stone-50 border-t border-stone-200">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <button onclick="app.switchTab('audience')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-stone-700">Global Audience</button>
+                <button onclick="app.switchTab('market')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-stone-700">Tech Market</button>
+                <button onclick="app.switchTab('forecast')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-stone-700">Forecasts & Strategy</button>
+                <button onclick="app.switchTab('ai')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-stone-700">✨ AI Insights</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+        <!-- Executive Summary / Hero Metrics -->
+        <section class="mb-10 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-stone-100">
+                <p class="text-sm font-medium text-stone-500">Global Interest Growth</p>
+                <p class="text-3xl font-bold text-stone-800 mt-2">+12.4% <span class="text-xs text-green-600 font-normal"><i class="fa-solid fa-arrow-up"></i> YoY</span></p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-stone-100">
+                <p class="text-sm font-medium text-stone-500">Top Growth Region</p>
+                <p class="text-3xl font-bold text-stone-800 mt-2">APAC <span class="text-xs text-stone-400 font-normal">led by India</span></p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-stone-100">
+                <p class="text-sm font-medium text-stone-500">Highest Demand Tech</p>
+                <p class="text-3xl font-bold text-stone-800 mt-2">React Native</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-stone-100">
+                <p class="text-sm font-medium text-stone-500">Est. Market Value (2025)</p>
+                <p class="text-3xl font-bold text-stone-800 mt-2">$240B+</p>
+            </div>
+        </section>
+
+        <!-- VIEW 1: GLOBAL AUDIENCE -->
+        <div id="view-audience" class="space-y-8 animate-fade-in">
+            <div class="bg-stone-50 border-l-4 border-orange-500 p-6 rounded-r-lg">
+                <h2 class="text-2xl font-bold text-stone-900 mb-2">Global Audience Landscape</h2>
+                <p class="text-stone-600 max-w-3xl">Analyze the geographic and demographic shifts in the global developer population.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-lg font-semibold text-stone-800 mb-6">Top 10 Countries by Audience Size</h3>
+                    <div class="chart-wrapper h-80 relative">
+                        <canvas id="audienceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-lg font-semibold text-stone-800 mb-4">Demographics: Age & Gender</h3>
+                        <div class="chart-wrapper h-48 relative mb-4">
+                            <canvas id="genderChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-lg font-semibold text-stone-800 mb-2">Top Learning Channels</h3>
+                        <ul class="space-y-3">
+                            <li class="flex justify-between items-center">
+                                <span class="text-stone-600 text-sm">YouTube/Video</span>
+                                <div class="w-24 bg-stone-200 rounded-full h-2"><div class="bg-stone-800 h-2 rounded-full" style="width: 85%"></div></div>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span class="text-stone-600 text-sm">MOOCs</span>
+                                <div class="w-24 bg-stone-200 rounded-full h-2"><div class="bg-stone-800 h-2 rounded-full" style="width: 65%"></div></div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: TECH MARKET -->
+        <div id="view-market" class="hidden space-y-8 animate-fade-in">
+            <div class="bg-stone-50 border-l-4 border-orange-500 p-6 rounded-r-lg">
+                <h2 class="text-2xl font-bold text-stone-900 mb-2">Market Analysis: Web & Mobile</h2>
+                <p class="text-stone-600 max-w-3xl">Comparing cross-platform vs native adoption and demand trends.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-lg font-semibold text-stone-800 mb-2">Technology Trade-off Matrix</h3>
+                    <div class="chart-wrapper h-80 relative flex justify-center">
+                        <canvas id="techRadarChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-lg font-semibold text-stone-800 mb-2">Developer Demand Growth</h3>
+                    <div class="chart-wrapper h-80 relative">
+                        <canvas id="marketTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: FORECASTS -->
+        <div id="view-forecast" class="hidden space-y-8 animate-fade-in">
+             <div class="bg-stone-50 border-l-4 border-orange-500 p-6 rounded-r-lg">
+                <h2 class="text-2xl font-bold text-stone-900 mb-2">3-Year Forecast & Strategy</h2>
+                <p class="text-stone-600 max-w-3xl">Projections for the 2025-2028 market cycle.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-lg font-semibold text-stone-800 mb-4">Projected Market Growth</h3>
+                    <div class="chart-wrapper h-64 relative">
+                        <canvas id="forecastChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-stone-800 text-white p-6 rounded-xl shadow-sm">
+                    <h3 class="text-lg font-semibold text-orange-400 mb-4"><i class="fa-solid fa-lightbulb mr-2"></i>Actionable Insights</h3>
+                    <ul class="space-y-4 text-sm text-stone-300">
+                        <li><strong>Reach:</strong> Target APAC with Mobile-First Web Apps.</li>
+                        <li><strong>Efficiency:</strong> Utilize React Native to lower engineering overhead by ~30%.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: ✨ AI INSIGHTS (Gemini Integration) -->
+        <div id="view-ai" class="hidden space-y-8 animate-fade-in">
+            <div class="bg-stone-50 border-l-4 border-blue-600 p-6 rounded-r-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-stone-900 mb-2">✨ Gemini Intelligence Assistant</h2>
+                    <p class="text-stone-600 max-w-2xl">Use LLM-powered analysis to consult on specific project needs or summarize complex market data.</p>
+                </div>
+                <button onclick="app.summarizeMarket()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> ✨ Summarize All Data
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Gemini Tech Consultant Tool -->
+                <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-lg font-semibold text-stone-800 mb-4">✨ Tech Stack Consultant</h3>
+                    <p class="text-sm text-stone-500 mb-4">Describe your app idea (e.g., "A high-performance fintech app for the US market") to get a data-driven recommendation.</p>
+                    
+                    <textarea id="ai-project-prompt" rows="4" class="w-full p-3 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Enter project description..."></textarea>
+                    
+                    <button id="ai-consultant-btn" onclick="app.consultGemini()" class="w-full mt-4 bg-stone-900 hover:bg-black text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                        Consult ✨ Intelligence
+                    </button>
+                    
+                    <div id="ai-status" class="hidden mt-4 text-sm text-blue-600 font-medium flex items-center gap-2">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i> Analyzing market variables...
+                    </div>
+                </div>
+
+                <!-- Analysis Output Display -->
+                <div class="lg:col-span-2 bg-white p-8 rounded-xl shadow-sm border border-stone-200 min-h-[400px] flex flex-col">
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-stone-100">
+                        <h3 class="text-lg font-semibold text-stone-800">Intelligence Briefing</h3>
+                        <span id="ai-label" class="text-xs font-bold uppercase tracking-wider text-stone-400 bg-stone-50 px-2 py-1 rounded">No Active Session</span>
+                    </div>
+                    
+                    <div id="ai-output" class="text-stone-700 markdown-content overflow-y-auto max-h-[500px]">
+                        <div class="flex flex-col items-center justify-center h-full text-stone-300 py-10">
+                            <i class="fa-solid fa-brain text-5xl mb-4"></i>
+                            <p class="text-center italic">Waiting for input... Use the consultant tool or click 'Summarize' to begin.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pre-defined Queries -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="app.quickConsult('Why is React Native growing so fast in APAC?')" class="p-4 bg-white border border-stone-200 rounded-lg text-sm text-stone-600 hover:bg-stone-50 transition-all text-left flex items-center gap-3">
+                    <span class="text-orange-500">✨</span> APAC Market Analysis
+                </button>
+                <button onclick="app.quickConsult('Compare PWA vs Native for African e-commerce.')" class="p-4 bg-white border border-stone-200 rounded-lg text-sm text-stone-600 hover:bg-stone-50 transition-all text-left flex items-center gap-3">
+                    <span class="text-blue-500">✨</span> Emerging Market Strategy
+                </button>
+                <button onclick="app.quickConsult('How should AI impact developer hiring in the next 3 years?')" class="p-4 bg-white border border-stone-200 rounded-lg text-sm text-stone-600 hover:bg-stone-50 transition-all text-left flex items-center gap-3">
+                    <span class="text-purple-500">✨</span> Future Labor Trends
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-stone-200 mt-auto py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center text-stone-500 text-sm">
+            &copy; 2025 Market Intelligence Unit. Powered by ✨ Gemini.
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const app = {
+            currentTab: 'audience',
+            charts: {},
+            apiKey: "", // Execution environment provides key
+
+            // Switching Tabs
+            switchTab: (tabId) => {
+                app.currentTab = tabId;
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active', 'text-stone-900'));
+                const activeBtn = document.getElementById(`nav-${tabId}`);
+                if(activeBtn) activeBtn.classList.add('active', 'text-stone-900');
+
+                document.getElementById('view-audience').classList.add('hidden');
+                document.getElementById('view-market').classList.add('hidden');
+                document.getElementById('view-forecast').classList.add('hidden');
+                document.getElementById('view-ai').classList.add('hidden');
+
+                document.getElementById(`view-${tabId}`).classList.remove('hidden');
+                Object.values(app.charts).forEach(chart => chart.resize());
+            },
+
+            // ✨ Gemini API Integration with Exponential Backoff
+            async callGemini(prompt, systemPrompt = "") {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${app.apiKey}`;
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    systemInstruction: systemPrompt ? { parts: [{ text: systemPrompt }] } : undefined
+                };
+
+                let delay = 1000;
+                for (let i = 0; i < 5; i++) {
+                    try {
+                        const response = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        const data = await response.json();
+                        return data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    } catch (err) {
+                        if (i === 4) throw err;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2;
+                    }
+                }
+            },
+
+            // ✨ AI Feature: Consultant
+            async consultGemini() {
+                const prompt = document.getElementById('ai-project-prompt').value;
+                if (!prompt) return;
+
+                const status = document.getElementById('ai-status');
+                const output = document.getElementById('ai-output');
+                const label = document.getElementById('ai-label');
+                const btn = document.getElementById('ai-consultant-btn');
+
+                status.classList.remove('hidden');
+                btn.disabled = true;
+                label.innerText = "Processing...";
+                output.innerHTML = '<div class="ai-loading h-2 w-full bg-stone-100 rounded mb-2"></div><div class="ai-loading h-2 w-3/4 bg-stone-100 rounded mb-2"></div><div class="ai-loading h-2 w-1/2 bg-stone-100 rounded"></div>';
+
+                const systemMsg = "You are a senior tech strategist. Use the following market data: React Native is growing 22% in jobs, Native development is premium/high cost ($40k-$100k), PWA/Web has the widest reach but lower performance. Provide a structured recommendation including: Proposed Tech Stack, Reason (based on market data), and Estimated Risk Level.";
+
+                try {
+                    const result = await app.callGemini(prompt, systemMsg);
+                    label.innerText = "Consultation Complete";
+                    output.innerHTML = app.formatMarkdown(result);
+                } catch (err) {
+                    output.innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded">Error: Failed to connect to ✨ intelligence. Please try again.</div>`;
+                    label.innerText = "Error";
+                } finally {
+                    status.classList.add('hidden');
+                    btn.disabled = false;
+                }
+            },
+
+            // ✨ AI Feature: Market Summary
+            async summarizeMarket() {
+                const output = document.getElementById('ai-output');
+                const label = document.getElementById('ai-label');
+                
+                app.switchTab('ai'); // Ensure we are on the AI tab
+                label.innerText = "Synthesizing...";
+                output.innerHTML = '<div class="flex flex-col gap-4"><div class="ai-loading h-10 w-full bg-stone-50 rounded"></div><div class="ai-loading h-24 w-full bg-stone-50 rounded"></div></div>';
+
+                const context = "Report Data: India led developer audience (18M), USA (14.5M). React Native job demand up 22%. Market value 2025: $240B. Demographics: 72% Men, 26% Women. Emerging trend: Mobile-first web in APAC/Africa.";
+                const prompt = "Based on this report data, write a 3-paragraph executive summary for a Venture Capitalist looking to invest in dev tools.";
+
+                try {
+                    const result = await app.callGemini(prompt);
+                    label.innerText = "Executive Summary";
+                    output.innerHTML = app.formatMarkdown(result);
+                } catch (err) {
+                    output.innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded">Summary generation failed.</div>`;
+                }
+            },
+
+            quickConsult(text) {
+                document.getElementById('ai-project-prompt').value = text;
+                app.consultGemini();
+            },
+
+            formatMarkdown(text) {
+                // Simple markdown-to-html converter for Gemini output
+                return text
+                    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                    .replace(/^\* (.*$)/gim, '<li>$1</li>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .split('\n').map(p => p.startsWith('<li>') ? p : `<p>${p}</p>`).join('');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.toggle('hidden');
+            });
+            initCharts();
+        });
+
+        function initCharts() {
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10 } } }
+                }
+            };
+
+            app.charts.audience = new Chart(document.getElementById('audienceChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['India', 'USA', 'China', 'Brazil', 'Nigeria', 'Germany', 'UK', 'Russia', 'Indonesia', 'Canada'],
+                    datasets: [{
+                        label: 'Audience (M)',
+                        data: [18.2, 14.5, 12.1, 6.8, 5.2, 4.9, 4.5, 4.1, 3.8, 3.2],
+                        backgroundColor: '#ea580c',
+                        borderRadius: 4
+                    }]
+                },
+                options: { ...commonOptions, indexAxis: 'y' }
+            });
+
+            app.charts.gender = new Chart(document.getElementById('genderChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Men', 'Women', 'Other'],
+                    datasets: [{
+                        data: [72, 26, 2],
+                        backgroundColor: ['#44403c', '#f97316', '#a8a29e']
+                    }]
+                },
+                options: { ...commonOptions, cutout: '70%' }
+            });
+
+            app.charts.techRadar = new Chart(document.getElementById('techRadarChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['Cost', 'Performance', 'Time-to-Market', 'Talent', 'Reach'],
+                    datasets: [
+                        { label: 'React Native', data: [8, 7, 9, 8, 9], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)' },
+                        { label: 'Native', data: [4, 10, 5, 6, 4], borderColor: '#1c1917', backgroundColor: 'rgba(28, 25, 23, 0.1)' }
+                    ]
+                },
+                options: commonOptions
+            });
+
+            app.charts.marketTrend = new Chart(document.getElementById('marketTrendChart'), {
+                type: 'line',
+                data: {
+                    labels: ['2020', '2021', '2022', '2023', '2024', '2025'],
+                    datasets: [
+                        { label: 'Web', data: [100, 115, 125, 130, 135, 142], borderColor: '#f97316', tension: 0.3 },
+                        { label: 'React Native', data: [40, 55, 75, 90, 110, 125], borderColor: '#3b82f6', tension: 0.3 }
+                    ]
+                },
+                options: commonOptions
+            });
+
+            app.charts.forecast = new Chart(document.getElementById('forecastChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['2025', '2026', '2027', '2028'],
+                    datasets: [{
+                        label: 'Market Size ($B)',
+                        data: [240, 275, 320, 380],
+                        backgroundColor: '#d6d3d1'
+                    }]
+                },
+                options: commonOptions
+            });
+        }
+    </script>
+</body>
+</html>
